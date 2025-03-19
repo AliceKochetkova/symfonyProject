@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\PersistentCollection;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BlogRepository::class)]
@@ -24,7 +25,7 @@ class Blog
     private ?string $title = null;
 
     #[Assert\NotBlank]
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
     #[Assert\NotBlank]
@@ -44,6 +45,11 @@ class Blog
     #[ORM\InverseJoinColumn(name: 'tag_id', referencedColumnName: 'id', unique: true)]
     #[ORM\ManyToMany(targetEntity: 'App\Entity\Tag', cascade: ['persist'])]
     private ArrayCollection|PersistentCollection $tags;
+
+    public function __construct(UserInterface | User $user)
+    {
+        $this->user = $user;
+    }
 
     public function getId(): ?int
     {

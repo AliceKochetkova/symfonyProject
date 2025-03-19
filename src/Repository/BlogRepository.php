@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Blog;
+use App\Entity\User;
 use App\Filter\BlogFilter;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -27,15 +29,23 @@ class BlogRepository extends ServiceEntityRepository
 
     }
 
-    public function findByBlogFilter(BlogFilter $blogFilter)
+    public function findByBlogFilter(BlogFilter $blogFilter): QueryBuilder
     {
-        $blogs = $this->createQueryBuilder('b')->where('1 = 1');
+        $blogs = $this->createQueryBuilder('b')
+            ->leftJoin(User::class, 'u', 'WITH', 'b.id = b.user')
+            ->where('1 = 1');
+        if ($blogFilter->getUser()) {
+            $blogs
+                ->andwhere('b.user = :user')
+                ->setParameter('user', $blogFilter->getUser());
+            ;
+        }
         if ($blogFilter->getTitle()){
             $blogs
                 ->andwhere('b.title LIKE :title')
                 ->setParameter('title', '%' . $blogFilter->getTitle() . '%')
             ;
         }
-        return $blogs->getQuery()->getResult();
+        return $blogs;
     }
 }

@@ -4,10 +4,13 @@ namespace App\Form;
 
 use App\Entity\Blog;
 use App\Entity\Category;
+use App\Entity\User;
 use App\Form\DataTransformer\TagTransformer;
+use App\Repository\BlogRepository;
 use App\Repository\CategoryRepository;
 use Symfony\Bridge\Doctrine\Form\DataTransformer\CollectionToArrayTransformer;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -17,7 +20,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class BlogType extends AbstractType
 {
 
-    public function __construct(private readonly TagTransformer $transformer)
+    public function __construct(
+        private readonly TagTransformer $transformer,
+        private readonly Security $security,
+    )
     {
     }
 
@@ -35,9 +41,10 @@ class BlogType extends AbstractType
                 'required' => true, ])
 
             ->add('text', TextareaType::class, [
-                'required' => true, ])
-
-            ->add('category', EntityType::class, [
+                'required' => true,
+                ]);
+        if ($this->security->isGranted('ROLE_ADMIN')) {
+            $builder->add('category', EntityType::class, [
                 'class' => Category::class,
                 'query_builder' => function ($repository) {
                     return $repository->createQueryBuilder('p')->orderBy('p.name', 'ASC');
@@ -47,8 +54,20 @@ class BlogType extends AbstractType
                 'empty_data' => '',
                 'placeholder' => '-- выбор категории --',
 
-            ])
-            ->add('tags', TextType::class, array(
+                ])->add('user', EntityType::class, [
+                'class' => User::class,
+                'query_builder' => function ($repository) {
+                    return $repository->createQueryBuilder('p')->orderBy('p.id', 'ASC');
+                },
+                'choice_label' => 'email',
+                'required' => false,
+                'empty_data' => '',
+                'placeholder' => '-- выбор пользователя --',
+
+            ]);
+        }
+
+        $builder->add('tags', TextType::class, array(
                 'label' => 'Теги',
                 'required' => false,
             ))
