@@ -7,7 +7,7 @@
  {
      private ?string $title = null;
 
-     public function __construct(private ?User $user = null)
+     public function __construct(private readonly ?User $user = null)
      {
      }
 

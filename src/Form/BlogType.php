@@ -12,6 +12,7 @@ use Symfony\Bridge\Doctrine\Form\DataTransformer\CollectionToArrayTransformer;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -36,10 +37,8 @@ class BlogType extends AbstractType
                 'attr' => [
                     'class' => 'myclass',
                 ]])
-
             ->add('description', TextareaType::class, [
                 'required' => true, ])
-
             ->add('text', TextareaType::class, [
                 'required' => true,
                 ]);
@@ -53,7 +52,6 @@ class BlogType extends AbstractType
                 'required' => false,
                 'empty_data' => '',
                 'placeholder' => '-- выбор категории --',
-
                 ])->add('user', EntityType::class, [
                 'class' => User::class,
                 'query_builder' => function ($repository) {
@@ -63,7 +61,12 @@ class BlogType extends AbstractType
                 'required' => false,
                 'empty_data' => '',
                 'placeholder' => '-- выбор пользователя --',
-
+            ])->add('status', ChoiceType::class, [
+                'choices' => [
+                    'pending' => 'pending',
+                    'active' => 'active',
+                    'blocked' => 'blocked',
+                ]
             ]);
         }
 
